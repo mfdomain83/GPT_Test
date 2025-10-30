@@ -1,0 +1,26 @@
+{
+  "steps": [
+    {
+      "id": "say-hello",
+      "description": "Print a greeting to the terminal",
+      "command": "echo 'Hello from the orchestrator!'"
+    },
+    {
+      "id": "show-date",
+      "description": "Display the current date",
+      "command": [
+        "date"
+      ]
+    },
+    {
+      "id": "refresh-svn-checkout",
+      "description": "Cleanup and update an SVN working copy",
+      "working_directory": "path/to/your/working-copy",
+      "command": [
+        "/bin/sh",
+        "-c",
+        "svn cleanup && svn update"
+      ]
+    }
+  ]
+}
