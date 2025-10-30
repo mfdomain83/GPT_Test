@@ -71,9 +71,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import shlex
-import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -92,17 +90,8 @@ DEFAULT_CONFIG = {
             "description": "Display the current date",
             "command": ["date"],
         },
-        {
-            "id": "refresh-svn-checkout",
-            "description": "Cleanup and update an SVN working copy",
-            "working_directory": "path/to/your/working-copy",
-            "command": ["/bin/sh", "-c", "svn cleanup && svn update"],
-        },
     ]
 }
-
-SVN_INSTALL_HELP_URL = "https://subversion.apache.org/packages.html"
-_SVN_COMMAND_PATTERN = re.compile(r"(^|\b)svn(\b|$)")
 
 
 class StepConfigError(RuntimeError):
@@ -116,7 +105,6 @@ class Step:
     id: str
     description: str
     command: Sequence[str]
-    working_directory: Path | None = None
 
     @staticmethod
     def from_dict(data: dict) -> "Step":
@@ -139,30 +127,7 @@ class Step:
             )
 
         description = str(data.get("description", ""))
-
-        working_directory_value = data.get("working_directory")
-        working_directory: Path | None
-        if working_directory_value is None:
-            working_directory = None
-        elif isinstance(working_directory_value, str) and working_directory_value:
-            working_directory = Path(working_directory_value).expanduser()
-        else:
-            raise StepConfigError(
-                "Step 'working_directory' must be a non-empty string when provided"
-            )
-
-        return Step(
-            id=step_id,
-            description=description,
-            command=command_list,
-            working_directory=working_directory,
-        )
-
-
-def command_requires_svn(command: Sequence[str]) -> bool:
-    """Return ``True`` if the command requires the ``svn`` executable."""
-
-    return any(_SVN_COMMAND_PATTERN.search(part) for part in command)
+        return Step(id=step_id, description=description, command=command_list)
 
 
 class StepRunner:
@@ -213,33 +178,12 @@ class StepRunner:
             print(f"\n>>> Running step '{step.id}'")
             if step.description:
                 print(f"    {step.description}")
-            if step.working_directory:
-                print(f"    Working directory: {step.working_directory}")
             print(f"    Command: {' '.join(step.command)}")
             if dry_run:
                 continue
 
-            if command_requires_svn(step.command) and shutil.which("svn") is None:
-                print(
-                    "The 'svn' command is required but was not found on this system.",
-                    file=sys.stderr,
-                )
-                print(
-                    "Please install Subversion before running this step.",
-                    file=sys.stderr,
-                )
-                print(
-                    f"Installation instructions: {SVN_INSTALL_HELP_URL}",
-                    file=sys.stderr,
-                )
-                return 127
-
             try:
-                completed = subprocess.run(
-                    step.command,
-                    check=False,
-                    cwd=str(step.working_directory) if step.working_directory else None,
-                )
+                completed = subprocess.run(step.command, check=False)
             except FileNotFoundError:
                 print(f"Command not found: {step.command[0]}", file=sys.stderr)
                 return 127

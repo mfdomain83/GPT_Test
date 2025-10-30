@@ -11,16 +11,6 @@
       "command": [
         "date"
       ]
-    },
-    {
-      "id": "refresh-svn-checkout",
-      "description": "Cleanup and update an SVN working copy",
-      "working_directory": "path/to/your/working-copy",
-      "command": [
-        "/bin/sh",
-        "-c",
-        "svn cleanup && svn update"
-      ]
     }
   ]
 }

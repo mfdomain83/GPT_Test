@@ -20,8 +20,6 @@ custom order you provide at runtime, or skipped entirely.
 
 2. Inspect the generated `steps.json` file to review or customize the steps.
    Each step requires an `id` and a `command`; descriptions are optional.
-   When a step needs to run inside a specific directory you can include an
-   optional `working_directory` field.
 
 3. List the available steps:
 
@@ -49,28 +47,3 @@ custom order you provide at runtime, or skipped entirely.
    ```
 
 For detailed usage information, run `./step_orchestrator.py --help`.
-
-## Example SVN refresh step
-
-The default configuration now includes a sample step named
-`refresh-svn-checkout`. It demonstrates how to change into an SVN working copy,
-run `svn cleanup`, and then `svn update` while surfacing any SVN errors through
-the orchestrator's normal exit handling. Update the `working_directory` value to
-match your checkout before running the step:
-
-```json
-{
-  "id": "refresh-svn-checkout",
-  "description": "Cleanup and update an SVN working copy",
-  "working_directory": "/absolute/path/to/your/checkout",
-  "command": ["/bin/sh", "-c", "svn cleanup && svn update"]
-}
-```
-
-When you execute this step, the orchestrator will enter the specified directory
-before invoking the combined SVN command. If either `svn cleanup` or
-`svn update` fails, their non-zero exit status is reported and halts the run so
-that you can inspect the SVN error. The orchestrator also verifies that the
-`svn` executable is available before running any SVN command. If Subversion is
-missing, the run is stopped with guidance to install it along with a link to the
-official installation resources.
