@@ -1,0 +1,16 @@
+{
+  "steps": [
+    {
+      "id": "say-hello",
+      "description": "Print a greeting to the terminal",
+      "command": "echo 'Hello from the orchestrator!'"
+    },
+    {
+      "id": "show-date",
+      "description": "Display the current date",
+      "command": [
+        "date"
+      ]
+    }
+  ]
+}
